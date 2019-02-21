@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 dist
 dist-*
 cabal-dev
@@ -21,8 +20,6 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
-=======
 .stack-work/
 learn-haskell.cabal
 *~
->>>>>>> b8e42e5... init
