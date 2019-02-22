@@ -4,7 +4,7 @@ import Prelude hiding (null, length, map, foldl, foldr, take, fst, snd, curry, u
 import ScottEncoding
 import Test.Hspec
 
-main = do
+spec = do
   describe "The Maybe type" $ do
     it "can be cast to Prelude.Maybe" $ do
       toMaybe (SMaybe const) `shouldBe` (Nothing :: Maybe Int)

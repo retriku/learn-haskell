@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 module Katas where
 
 difference :: Eq a => [a] -> [a] -> [a]
@@ -13,3 +14,8 @@ noBoringZeros a =
     noBoringZeros $ a `div` 10
   else
     a
+
+newtype ListS a =
+  ListS {
+    unconsS :: forall r. (a -> ListS a -> r) -> r -> r
+  }
