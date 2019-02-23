@@ -19,6 +19,11 @@ spec = do
     it "can be cast from []" $ do
       runList (fromList []) 0 reduce `shouldBe` 0
       runList (fromList [1,2]) 0 reduce `shouldBe` 21
+    it "can calculate SList length" $ do
+      (length . fromList) [] `shouldBe` 0
+      (length . fromList) [1,2,3] `shouldBe` 3
+    it "map SList a to SList b" $ do
+      (toList . (map (*2)) . fromList) [1,2,3] `shouldBe` [2,4,6]
   describe "The Either type" $ do
     it "can be cast to Prelude.Either" $ do
       toEither (SEither $ \f _ -> f 3) `shouldBe` (Left 3 :: Either Int String)

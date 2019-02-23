@@ -16,7 +16,7 @@ toPair (SPair p) = p(\a b -> (a, b))
 fromPair :: (a,b) -> SPair a b
 fromPair (a,b) = SPair(\p -> p a b)
 fst :: SPair a b -> a
-fst (SPair p) = p(\a _ -> a) 
+fst (SPair p) = p(\a _ -> a)
 snd :: SPair a b -> b
 snd (SPair p) = p(\_ b -> b)
 swap :: SPair a b -> SPair b a
@@ -24,19 +24,19 @@ swap (SPair p) = p(\a b -> SPair (\p -> p b a))
 curry :: (SPair a b -> c) -> (a -> b -> c)
 curry = error "curry"
 uncurry :: (a -> b -> c) -> (SPair a b -> c)
-uncurry = error "uncurry"
+uncurry f = error "uncurry"
 
 toMaybe :: SMaybe a -> Maybe a
 toMaybe (SMaybe m) = m Nothing (\a -> Just a)
 fromMaybe :: Maybe a -> SMaybe a
 fromMaybe Nothing = SMaybe(\e _ -> e)
-fromMaybe (Just v) = SMaybe(\_ f -> f v) 
+fromMaybe (Just v) = SMaybe(\_ f -> f v)
 isJust :: SMaybe a -> Bool
-isJust = error "isJust"
+isJust (SMaybe m) = m False (\_ -> True)
 isNothing :: SMaybe a -> Bool
-isNothing = error "isNothing"
+isNothing (SMaybe m) = m True (\_ -> False)
 catMaybes :: SList (SMaybe a) -> SList a
-catMaybes = error "catMaybes"
+catMaybes (SList l) = error "catMaybes"
 
 toEither :: SEither a b -> Either a b
 toEither (SEither e) = e Left Right
@@ -44,32 +44,44 @@ fromEither :: Either a b -> SEither a b
 fromEither (Left v) = SEither(\l _ -> l v)
 fromEither (Right v) = SEither(\_ r -> r v)
 isLeft :: SEither a b -> Bool
-isLeft = error "isLeft"
+isLeft (SEither e) = e (\_ -> True) (\_ -> False)
 isRight :: SEither a b -> Bool
-isRight = error "isRight"
+isRight (SEither e) = e (\_ -> False) (\_ -> True)
 partition :: SList (SEither a b) -> SPair (SList a) (SList b)
 partition = error "partition"
 
+
+-- SList
 toList :: SList a -> [a]
-toList (SList l) = l [] (\x xs -> x : (toList xs))
+toList (SList sl) = sl [] (\x xs -> x : (toList xs))
+
 fromList :: [a] -> SList a
 fromList [] = SList(\ni _ -> ni)
 fromList (x:xs) = SList(\_ co -> co x (fromList xs))
+
 cons :: a -> SList a -> SList a
 cons x xs = SList (\_ co -> co x xs)
+
 concat :: SList a -> SList a -> SList a
-concat = error "concat"
+concat (SList sl1) (SList sl2) = sl2 (SList sl1) (\_ _ -> sl1 (SList sl2) (\x xs -> x `cons` (xs `concat` (SList sl2))))
+
 null :: SList a -> Bool
-null = error "null"
+null (SList sl) = sl True (\_ _ -> False)
+
 length :: SList a -> Int
-length = error "length"
+length (SList sl) = sl 0 (\_ xs -> 1 + length xs)
+
 map :: (a -> b) -> SList a -> SList b
-map = error "map"
+map f (SList sl) = sl (fromList []) (\x xs -> (f x) `cons` (map f xs))
+
 zip :: SList a -> SList b -> SList (SPair a b)
 zip = error "zip"
+
 foldl :: (b -> a -> b) -> b -> SList a -> b
 foldl = error "foldl"
+
 foldr :: (a -> b -> b) -> b -> SList a -> b
 foldr = error "foldr"
+
 take :: Int -> SList a -> SList a
-take = error "take"
+take i = error "take"
