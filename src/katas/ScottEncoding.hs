@@ -28,7 +28,7 @@ swap :: SPair a b -> SPair b a
 swap (SPair p) = p(\a b -> SPair (\p -> p b a))
 
 curry :: (SPair a b -> c) -> (a -> b -> c)
-curry = error "curry"
+curry f = error ""
 
 uncurry :: (a -> b -> c) -> (SPair a b -> c)
 uncurry f = error "uncurry"
