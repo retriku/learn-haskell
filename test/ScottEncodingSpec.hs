@@ -22,8 +22,12 @@ spec = do
     it "can calculate SList length" $ do
       (length . fromList) [] `shouldBe` 0
       (length . fromList) [1,2,3] `shouldBe` 3
-    it "map SList a to SList b" $ do
+    it "can map SList a to SList b" $ do
       (toList . (map (*2)) . fromList) [1,2,3] `shouldBe` [2,4,6]
+    it "can concat two SLists" $ do
+      (toList $ concat (fromList [1,2,3]) (fromList [4,5,6])) `shouldBe` [1,2,3,4,5,6]
+      (toList $ concat (fromList []) (fromList [4,5,6])) `shouldBe` [4,5,6]
+      (toList $ concat (fromList [1,2,3]) (fromList [])) `shouldBe` [1,2,3]
   describe "The Either type" $ do
     it "can be cast to Prelude.Either" $ do
       toEither (SEither $ \f _ -> f 3) `shouldBe` (Left 3 :: Either Int String)
