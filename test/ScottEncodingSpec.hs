@@ -31,6 +31,10 @@ spec = do
       (toList $ concat (fromList []) (fromList [])) `shouldBe` ([]::[Int])
     it "can zip two SLists" $ do
       (toList $ (map toPair $ zip (fromList [1,2]) (fromList "abc"))) `shouldBe` [(1,'a'), (2,'b')]
+    it "can fold SList" $ do
+      foldl (+) 0 (fromList [1,2,3,4]) `shouldBe` 10
+    it "can take n elements from SList" $ do
+      (toList $ take 3 (fromList [1,2,3,4,5])) `shouldBe` [1,2,3]
   describe "The Either type" $ do
     it "can be cast to Prelude.Either" $ do
       toEither (SEither $ \f _ -> f 3) `shouldBe` (Left 3 :: Either Int String)

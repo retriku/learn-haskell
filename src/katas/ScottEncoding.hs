@@ -6,10 +6,7 @@ import Prelude hiding (null, length, map, foldl, foldr, take, fst, snd, curry, u
 newtype SMaybe a = SMaybe { runMaybe :: forall b. b -> (a -> b) -> b }
 newtype SList a = SList { runList :: forall b. b -> (a -> SList a -> b) -> b }
 newtype SEither a b = SEither { runEither :: forall c. (a -> c) -> (b -> c) -> c }
-newtype SPair a b = SPair {
-  runPair :: forall c. (a -> b -> c) -> c
-  -- runPair :: SPair a b -> (a -> b -> c) -> c
-}
+newtype SPair a b = SPair { runPair :: forall c. (a -> b -> c) -> c }
 
 --SPair
 toPair :: SPair a b -> (a,b)
@@ -28,10 +25,10 @@ swap :: SPair a b -> SPair b a
 swap (SPair p) = p(\a b -> SPair (\p -> p b a))
 
 curry :: (SPair a b -> c) -> (a -> b -> c)
-curry f = error ""
+curry f = \a b -> f $ fromPair (a,b)
 
 uncurry :: (a -> b -> c) -> (SPair a b -> c)
-uncurry f = error "uncurry"
+uncurry f = \(SPair p) -> p f
 
 
 -- SMaybe
@@ -68,7 +65,10 @@ isRight :: SEither a b -> Bool
 isRight (SEither e) = e (\_ -> False) (\_ -> True)
 
 partition :: SList (SEither a b) -> SPair (SList a) (SList b)
-partition = error "partition"
+partition sl = fromPair (l,r)
+  where
+    l = map (\(Left x) -> x) $ map toEither $ filterS isLeft sl
+    r = map (\(Right x) -> x) $ map toEither $ filterS isRight sl
 
 
 -- SList
@@ -92,17 +92,30 @@ length :: SList a -> Int
 length (SList sl) = sl 0 (\_ xs -> 1 + length xs)
 
 map :: (a -> b) -> SList a -> SList b
-map f (SList sl) = sl (fromList []) (\x xs -> (f x) `cons` (map f xs))
+map f (SList sl) = sl emptyList (\x xs -> (f x) `cons` (map f xs))
 
 zip :: SList a -> SList b -> SList (SPair a b)
-zip (SList sl1) (SList sl2) = sl1 empty (\x1 xs1 -> sl2 empty (\x2 xs2 -> (fromPair (x1, x2) `cons` zip xs1 xs2)))
-  where empty = fromList []
+zip (SList sl1) (SList sl2) = sl1 emptyList (\x1 xs1 -> sl2 emptyList (\x2 xs2 -> (fromPair (x1, x2) `cons` zip xs1 xs2)))
 
 foldl :: (b -> a -> b) -> b -> SList a -> b
-foldl f e (SList sl) = error ""
+foldl f e (SList sl) = sl e (\x -> foldl f (f e x))
 
 foldr :: (a -> b -> b) -> b -> SList a -> b
-foldr f e (SList sl)= error "foldr"
+foldr f e (SList sl) = sl e (\x xs -> f x $ foldr f e xs)
 
 take :: Int -> SList a -> SList a
-take i = error "take"
+take 0 sl = emptyList
+take i (SList sl) = sl emptyList (\x xs -> x `cons` take (i-1) xs)
+
+emptyList = fromList []
+
+filterS :: (a -> Bool) -> SList a -> SList a
+filterS p (SList sl) =
+  sl
+    emptyList
+    (\x xs ->
+       if (p x) then
+         x `cons` filterS p xs
+       else
+         filterS p xs
+    )
