@@ -31,7 +31,12 @@ instance Monad Maybe where
 
 instance Monad (State s) where
   return v = State(\s -> (v, s))
-  (State g) >>= f = undefined
+  (State g) >>= f =
+    State(\s ->
+            let (currentValue, currentState) = g s
+                (State newState) = f currentValue
+            in newState currentState
+         )
 
 instance Monad (Reader s) where
   return = undefined
