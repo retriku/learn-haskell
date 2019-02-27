@@ -67,6 +67,7 @@ isoUnMaybe :: ISO (Maybe a) (Maybe b) -> ISO a b
 -- Remember, for all valid ISO, converting and converting back
 -- Is the same as the original value.
 -- You need this to prove some case are impossible.
+isoUnMaybe (fa, fb) = undefined
 
 -- We cannot have
 -- isoUnEither :: ISO (Either a b) (Either c d) -> ISO a c -> ISO b d.
