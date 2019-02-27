@@ -32,16 +32,25 @@ instance Monad Maybe where
 instance Monad (State s) where
   return v = State(\s -> (v, s))
   (State g) >>= f =
-    State(\s ->
-            let (currentValue, currentState) = g s
-                (State newState) = f currentValue
-            in newState currentState
+    State(\currentState ->
+            let (currentValue, newState) = g currentState
+                (State h) = f currentValue
+            in h newState
          )
 
 instance Monad (Reader s) where
-  return = undefined
-  (Reader g) >>= f = undefined
+  return v = Reader $ \_ -> v
+  (Reader g) >>= f =
+    Reader(\r ->
+              let v = g r
+              in runReader (f v) r
+          )
 
 instance Monoid w => Monad (Writer w) where
-  return = undefined
-  (Writer (s, v)) >>= f = undefined
+  return v = Writer $ (mempty, v)
+  (Writer (s, v)) >>= f =
+    Writer(
+              let newW = f v
+                  (newS, newV) = runWriter newW
+              in (s `mappend`  newS, newV)
+          )

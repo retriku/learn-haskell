@@ -7,7 +7,6 @@ import Monads as M
 import Test.Hspec
 
 
--- Dummy test to make sure your code type checks before submission.
 spec = do
   describe "Lifting values to monads" $ do
     it "should lift Identity" $ do
@@ -15,15 +14,14 @@ spec = do
     it "should lift Maybe" $ do
       M.return 'q' `shouldBe` (M.Just 'q')
     it "should lift State" $ do
-      (v `shouldBe` "abc")
-        where (v, _) = runState (M.return "abc")
+      fst(runState (M.return 1) []) `shouldBe` 1
+    it "should lift Reader" $ do
+      runReader (M.return 1) 2 `shouldBe` 1
+    it "should lift Writer" $ do
+      runWriter (M.return 1) `shouldBe` ((), 1)
 
-type Stack = [Int]
-popS :: State Stack Int  
+popS :: Show a => State [a] a
 popS = State $ \(x:xs) -> (x,xs)  
   
-pushS :: Int -> State Stack ()  
-pushS a = State $ \xs -> ((),a:xs)
-
-stackManip :: State Stack Int
-stackManip = pushS 4 >>= \_ -> pushS 3 >>= (\_ -> popS)
+pushS :: Show a =>  a -> State [a] ()  
+pushS a = State $ \xs -> ((), a:xs)
