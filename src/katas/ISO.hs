@@ -24,7 +24,7 @@ substL = fst
 
 -- and vice versa
 substR :: ISO a b -> (b -> a)
-substR = error "do substR"
+substR = snd
 
 -- There can be more than one ISO a b
 isoBool :: ISO Bool Bool
@@ -35,32 +35,47 @@ isoBoolNot = (not, not)
 
 -- isomorphism is reflexive
 refl :: ISO a a
-refl = error "do refl"
+refl = (\a -> a, \a -> a)
 
 -- isomorphism is symmetric
 symm :: ISO a b -> ISO b a
-symm = error "do symm"
+symm (a, b) = (b, a)
 
 -- isomorphism is transitive
 trans :: ISO a b -> ISO b c -> ISO a c
-trans = error "do trans"
+trans aba bcb = (fst(bcb) . fst(aba), snd(aba) . snd(bcb))
 
 -- We can combine isomorphism:
 isoTuple :: ISO a b -> ISO c d -> ISO (a, c) (b, d)
-isoTuple (ab, ba) (cd, dc) = 
-  (\(a, c) -> (ab a, cd c), error "do isoTuple")
+isoTuple (ab, ba) (cd, dc) = (
+  \(a, c) -> (ab a, cd c),
+  \(b, d) -> (ba b, dc d)
+  )
 
 isoList :: ISO a b -> ISO [a] [b]
-isoList = error "do isoList"
+isoList (ab, ba) = (\la -> map ab la, \lb -> map ba lb)
 
 isoMaybe :: ISO a b -> ISO (Maybe a) (Maybe b)
-isoMaybe (ab, ba) = error "do isoMaybe"
+isoMaybe (ab, ba) = (
+  \ma -> mapMaybe ab ma,
+  \mb -> mapMaybe ba mb
+  )
 
 isoEither :: ISO a b -> ISO c d -> ISO (Either a c) (Either b d)
-isoEither = error "do isoEither"
+isoEither (ab, ba) (cd, dc) = (
+  \eac -> case eac of
+      Left a -> Left(ab a)
+      Right c -> Right(cd c),
+  \ebd -> case ebd of
+      Left b -> Left(ba b)
+      Right d -> Right(dc d)
+  )
 
 isoFunc :: ISO a b -> ISO c d -> ISO (a -> c) (b -> d)
-isoFunc = error "do isoFunc"
+isoFunc (ab, ba) (cd, dc) = (
+  \ac -> cd . ac . ba,
+  \bd -> dc . bd . ab
+  )
 
 -- Going another way is hard (and is generally impossible)
 isoUnMaybe :: ISO (Maybe a) (Maybe b) -> ISO a b
@@ -83,3 +98,9 @@ isoEU = error "do isoEU"
 -- And we have isomorphism on isomorphism!
 isoSymm :: ISO (ISO a b) (ISO b a)
 isoSymm = error "do isoSymm"
+
+
+-- Helpers
+mapMaybe :: (a -> b) -> Maybe a -> Maybe b
+mapMaybe _ Nothing = Nothing
+mapMaybe f (Just a) = Just(f a)
