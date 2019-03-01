@@ -56,10 +56,7 @@ isoList :: ISO a b -> ISO [a] [b]
 isoList (ab, ba) = (\la -> map ab la, \lb -> map ba lb)
 
 isoMaybe :: ISO a b -> ISO (Maybe a) (Maybe b)
-isoMaybe (ab, ba) = (
-  \ma -> mapMaybe ab ma,
-  \mb -> mapMaybe ba mb
-  )
+isoMaybe (ab, ba) = (wrapInMaybe ab, wrapInMaybe ba)
 
 isoEither :: ISO a b -> ISO c d -> ISO (Either a c) (Either b d)
 isoEither (ab, ba) (cd, dc) = (
@@ -82,8 +79,8 @@ isoUnMaybe :: ISO (Maybe a) (Maybe b) -> ISO a b
 -- Remember, for all valid ISO, converting and converting back
 -- Is the same as the original value.
 -- You need this to prove some case are impossible.
-isoUnMaybe (fa, fb) = undefined
-
+isoUnMaybe (ma2mb, mb2ma) = (unwrapMaybe ma2mb, unwrapMaybe mb2ma)
+  
 -- We cannot have
 -- isoUnEither :: ISO (Either a b) (Either c d) -> ISO a c -> ISO b d.
 -- Note that we have
@@ -101,6 +98,17 @@ isoSymm = error "do isoSymm"
 
 
 -- Helpers
+wrapInMaybe :: (a -> b) -> (Maybe a -> Maybe b)
+wrapInMaybe f = \ma -> mapMaybe f ma
+
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
 mapMaybe _ Nothing = Nothing
 mapMaybe f (Just a) = Just(f a)
+
+unwrapMaybe :: (Maybe a -> Maybe b) -> (a -> b)
+unwrapMaybe ma2mb = \a ->
+  case ma2mb $ Just a of
+    Just b -> b
+    Nothing -> case ma2mb Nothing of
+      Just b -> b
+      Nothing -> error "nothing"
