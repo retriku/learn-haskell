@@ -85,7 +85,15 @@ isoUnMaybe (ma2mb, mb2ma) = (unwrapMaybe ma2mb, unwrapMaybe mb2ma)
 -- isoUnEither :: ISO (Either a b) (Either c d) -> ISO a c -> ISO b d.
 -- Note that we have
 isoEU :: ISO (Either [()] ()) (Either [()] Void)
-isoEU = error "do isoEU"
+isoEU = (
+  \a -> case a of
+    Left l -> Left (l ++ l)
+    Right () -> Left [()],
+  \b -> case b of
+    Left [()] -> Right ()
+    Left l -> Left $ fst(splitAt (length l `div` 2) l)
+    Right _ -> Right ()
+  )
 -- where (), the empty tuple, has 1 value, and Void has 0 value
 -- If we have isoUnEither,
 -- We have ISO () Void by calling isoUnEither isoEU
