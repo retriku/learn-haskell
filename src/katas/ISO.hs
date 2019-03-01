@@ -102,10 +102,7 @@ isoEU = (
 
 -- And we have isomorphism on isomorphism!
 isoSymm :: ISO (ISO a b) (ISO b a)
-isoSymm = (
-  \isoAb -> symm isoAb,
-  \isoBa -> symm isoBa
-  )
+isoSymm = (symm, symm)
 
 
 -- Helpers
