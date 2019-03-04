@@ -1,10 +1,10 @@
-module PolyvariadicFunctionsSoec where
+module PolyvariadicFunctionsSpec where
 
 import Test.Hspec
 
 import PolyvariadicFunctions
 
-spec = hspec
+spec = do
   describe "polyAdd" $ do
     it "Works for the examples" $ do
       (polyAdd 1 3 5 7 9 :: Int) `shouldBe` 25
