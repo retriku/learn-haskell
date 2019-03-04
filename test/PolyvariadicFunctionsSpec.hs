@@ -27,7 +27,7 @@ spec = do
       (polyWords "Hulle" "is nie" "honde" "nie!" :: String) `shouldBe` "Hulle is nie honde nie!"
       (polyWords "a^2" "+" "b^2" "=" "c^2" :: String) `shouldBe` "a^2 + b^2 = c^2"
 
-  describe "polyList" $ do
+  describe "Polylist" $ do
     it "Works for the examples" $ do
       (polyList 5 4 3 2 1 :: [Integer]) `shouldBe` [5,4,3,2,1]
       (polyList 'H' 'e' 'l' 'l' 'o' :: String) `shouldBe` "Hello"

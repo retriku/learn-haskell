@@ -32,7 +32,7 @@ class PolyAdderList a where
   addL :: [a] -> a
 
 instance PolyAdderList a where
-  addL = id
+  addL = undefined
 
 -- `polyList` turns its arguments into a list, polymorphically.
 polyList :: [a] -> [a]
@@ -46,7 +46,8 @@ instance PolyAdderStr String  where
   addS = id
 
 instance PolyAdderStr r => PolyAdderStr (String -> r) where
-  addS s1 s2 = addS(s1 ++ s2)
+  addS s1 s2 = addS(s1 ++ d ++ s2)
+    where d = if (null s1) then "" else " "
 
 
 -- `polyWords` turns its arguments into a spaced string.
