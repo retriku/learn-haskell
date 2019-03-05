@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module PC.Test where
+module PCSpec where
 import PC
 import Test.Hspec
 import Test.QuickCheck
