@@ -1,2 +1,4 @@
-module P where f=replicate 100
---f a=all((>0).rem a)[x|x<-[2..(floor.sqrt.fromIntegral)a],x<a]
+module P where
+f :: Int -> [Int]
+f a=[a,a..100]
+--f x=mod(2^x-2)x<1
