@@ -1,6 +1,6 @@
-{-# LANGUAGE 
-  FlexibleInstances, 
-  UndecidableInstances, 
+{-# LANGUAGE
+  FlexibleInstances,
+  UndecidableInstances,
   InstanceSigs,
   ScopedTypeVariables,
   RankNTypes #-}
@@ -22,7 +22,13 @@ substR :: ISO a b -> (b -> a)
 substR = snd
 
 liftISO2 :: ISO a b -> ISO (a -> a -> a) (b -> b -> b)
-liftISO2 = error "do liftISO2"
+liftISO2 a = isoFunc a $ isoFunc a a
+
+isoFunc :: ISO a b -> ISO c d -> ISO (a -> c) (b -> d)
+isoFunc (ab, ba) (cd, dc) = (
+  \ac -> cd . ac . ba,
+  \bd -> dc . bd . ab
+  )
 
 -- A Natural Number is either Zero,
 -- or a Successor (1 +) of Natural Number.
@@ -77,7 +83,7 @@ instance Nat Peano where
 -- O is like [], and S is like :: (except it lack the head part)
 -- When we want to store no information, we can use (), a empty tuple
 -- This is different from storing nothing (called Void in Haskell),
--- as we can create a value of () by using (), 
+-- as we can create a value of () by using (),
 -- but we cannot create a value of Void.
 
 -- Notice how you can implement everything once you have isoP,
