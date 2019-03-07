@@ -81,8 +81,7 @@ instance Nat Peano where
   zero = O
   successor = S
   nat a _ O = a
-  nat _ f (S s) = nat a f s
-    where a = f $ successor s
+  nat _ f (S s) = f s
   iter a _ O = a
   iter a f (S s) = iter (f a) f s
   plus O n = n
@@ -118,7 +117,7 @@ instance Nat [()] where
   zero = []
   successor = (():)
   nat a _ [] = a
-  nat _ f n@(_:xs) = nat (f n) f xs
+  nat _ f (_:xs) = f xs
   iter a _ [] = a
   iter a f (_:xs) = iter (f a) f xs
   plus [] n = n
