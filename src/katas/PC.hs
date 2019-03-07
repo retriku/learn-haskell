@@ -143,8 +143,8 @@ instance Nat [()] where
 -- We can define it from Pattern Matching
 newtype Scott = Scott { runScott :: forall a. a -> (Scott -> a) -> a }
 instance Nat Scott where
-  zero = Scott(\z s -> z)
-  successor n = Scott(\z s -> s n)
+  zero = Scott(\z _ -> z)
+  successor n = Scott(\_ s -> s n)
   nat a f (Scott s) = s a f
   iter a f (Scott s) = s a (iter (f a) f)
   -- Other operation on Scott numeral is sort of boring,
@@ -163,3 +163,11 @@ instance Nat Church where
   -- So plus should not use successor,
   -- mult should not use plus,
   -- exp should not use mult.
+  zero = Church(\_ z -> z)
+  successor (Church n) = Church(\c z -> n c (c z)) 
+  nat a f n = nat a f n
+  iter a f (Church n) = n f a
+  plus = substR (liftISO2 isoP) plus
+  minus = substR (liftISO2 isoP) minus
+  mult = substR (liftISO2 isoP) mult
+  pow = substR (liftISO2 isoP) pow
