@@ -78,6 +78,30 @@ data Peano = O | S Peano deriving (Show, Eq, Ord)
 
 -- Remember, 0 - x = 0 for all x.
 instance Nat Peano where
+  zero = O
+  successor = S
+  nat a _ O = a
+  nat _ f (S s) = nat a f s
+    where a = f (S s)
+  iter a _ O = a
+  iter a f (S s) = iter (f a) f s
+  plus O n = n
+  plus (S s) n = plus s (S n)
+  minus O n = O
+  minus n O = n
+  minus (S s1) (S s2) = minus s1 s2
+  mult O _ = O
+  mult _ O = O
+  mult n (S O) = n
+  mult n s = multInner n s
+    where multInner acc (S O) = acc
+          multInner acc (S i) = multInner (plus acc n) i
+  pow _ O = (S O)
+  pow O _ = O
+  pow n (S O) = n
+  pow n s = powInner n s
+    where powInner acc (S O) = acc
+          powInner acc (S i) = powInner (mult acc n) i
 
 -- Peano is very similar to a basic data type in Haskell - List!
 -- O is like [], and S is like :: (except it lack the head part)
