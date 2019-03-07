@@ -86,22 +86,22 @@ instance Nat Peano where
   iter a _ O = a
   iter a f (S s) = iter (f a) f s
   plus O n = n
-  plus (S s) n = plus s $ successor n
+  plus (S s) n = s + successor n
   minus O _ = O
   minus n O = n
-  minus (S s1) (S s2) = minus s1 s2
+  minus (S s1) (S s2) = s1 - s2
   mult O _ = O
   mult _ O = O
   mult n (S O) = n
   mult n m = multInner n m
     where multInner acc (S O) = acc
-          multInner acc (S i) = multInner (plus acc n) i
+          multInner acc (S i) = multInner (acc + n) i
   pow _ O = successor O
   pow O _ = O
   pow n (S O) = n
   pow n m = powInner n m
     where powInner acc (S O) = acc
-          powInner acc (S i) = powInner (mult acc n) i
+          powInner acc (S i) = powInner (acc * n) i
 
 -- Peano is very similar to a basic data type in Haskell - List!
 -- O is like [], and S is like :: (except it lack the head part)
@@ -122,22 +122,22 @@ instance Nat [()] where
   iter a _ [] = a
   iter a f (_:xs) = iter (f a) f xs
   plus [] n = n
-  plus (x:xs) n = plus xs $ successor n
+  plus (x:xs) n = xs + successor n
   minus [] _ = []
   minus n [] = n
-  minus (_:xs) (_:ys) = minus xs ys
+  minus (_:xs) (_:ys) = xs - ys
   mult [] _ = []
   mult _ [] = []
   mult n [()] = n
   mult n m = multInner n m
     where multInner acc [()] = acc
-          multInner acc (_:xs) = multInner (plus acc n) xs
+          multInner acc (_:xs) = multInner (acc + n) xs
   pow _ [] = successor []
   pow [] _ = []
   pow n [()] = n
   pow n m = powInner n m
     where powInner acc [()] = acc
-          powInner acc (_:xs) = powInner (mult acc n) xs
+          powInner acc (_:xs) = powInner (acc * n) xs
 
 -- Instead of defining Nat from zero, sucessor (and get Peano),
 -- We can define it from Pattern Matching
