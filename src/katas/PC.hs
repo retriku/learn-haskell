@@ -143,6 +143,10 @@ instance Nat [()] where
 -- We can define it from Pattern Matching
 newtype Scott = Scott { runScott :: forall a. a -> (Scott -> a) -> a }
 instance Nat Scott where
+  zero = Scott(\z s -> z)
+  successor n = Scott(\z s -> s n)
+  nat a f (Scott s) = s a f
+  iter a f (Scott s) = s a (iter (f a) f)
   -- Other operation on Scott numeral is sort of boring,
   -- So we implement it using operation on Peano.
   -- You shouldnt do this - I had handled all the boring case for you.
