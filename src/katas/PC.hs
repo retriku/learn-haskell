@@ -163,8 +163,9 @@ instance Nat Church where
   -- mult should not use plus,
   -- exp should not use mult.
   zero = Church(\_ z -> z)
-  successor (Church n) = Church(\c z -> n c (c z)) 
-  nat a f n = nat a f n
+  successor (Church n) = Church(\c z -> n c (c z))
+  nat a f c@(Church n) = n (\_ -> f (c - one)) a
+    where one = successor zero
   iter a f (Church n) = n f a
   plus = substR (liftISO2 isoP) plus
   minus = substR (liftISO2 isoP) minus
