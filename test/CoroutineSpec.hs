@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Tests where
+module CoroutineSpec where
 
 import Test.Hspec
 import Test.QuickCheck (property)
@@ -17,7 +17,7 @@ run c = apply c (\case
                   Done x -> x
                   _ -> error "Not x")
           
-spec =
+spec = do
   describe "Library functions" $ do
     it "output" $ do
       consume (output 5) `shouldBe` [5]

@@ -13,7 +13,7 @@ instance Applicative (Coroutine r u d) where
   (<*>) = ap
 
 instance Monad (Coroutine r u d) where
-  return x = Coroutine (\k -> undefined)
+  return x = Coroutine (\k -> k (Done x))
   f >>= g  = Coroutine (\k -> undefined)
 
 (>>>) :: Coroutine r u m a -> Coroutine r m d a -> Coroutine r u d a
