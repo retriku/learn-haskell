@@ -24,6 +24,8 @@ dependencies:
 - mtl
 - text
 - acme-missiles
+- random
+- containers
 
 library:
   source-dirs:

@@ -39,6 +39,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - acme-missiles-0.3
+- haddock-api-2.22.0@sha256:b879f84786a1f3d5c93db5c79456117a383fd8629fa93e4d2c0acc6222bfbc72
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

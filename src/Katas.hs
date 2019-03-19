@@ -1,6 +1,8 @@
 {-# LANGUAGE RankNTypes #-}
 module Katas where
 
+import System.Random
+
 difference :: Eq a => [a] -> [a] -> [a]
 difference a [] = a
 difference [] _ = []
@@ -19,3 +21,17 @@ newtype ListS a =
   ListS {
     unconsS :: forall r. (a -> ListS a -> r) -> r -> r
   }
+
+bind :: (Integer -> (Integer, String)) -> ((Integer, String) -> (Integer, String))
+bind f g@(x,s) = (y, s ++ s')
+  where (y, s') = f x
+
+unit :: Integer -> (Integer, String)
+unit n = (n, "")
+
+lift f = unit . f
+
+bindR :: (a -> StdGen -> (b, StdGen)) -> (StdGen -> (a, StdGen)) -> (StdGen -> (b, StdGen))
+bindR f r seed = (b, newGen)
+  where (a, gen) = r seed
+        (b, newGen) = f a gen

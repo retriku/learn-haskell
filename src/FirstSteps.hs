@@ -25,13 +25,13 @@ mightFail = do
 
 fibs1 n = (unfoldr (\(a,b) -> Just (a,(b,a+b))) (0,1)) !! n
 
-fibs2 n = fibs !! n 
+fibs2 n = fibs !! n
   where fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
 
 fibs3 n = snd $ (iterate (next) (0, 1)) !! (n - 1)
   where next (a, b) = (b, a + b)
 
- 
+
 data MyList a = MyEmpty | MyCons a (MyList a)
 
 listHead :: MyList a -> Maybe a
