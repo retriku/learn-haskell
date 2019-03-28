@@ -98,3 +98,10 @@ eval2 env (App exp1 exp2) =
       FunVal env' n body ->
         eval2 (Map.insert n r2 env') body
       _ -> throwError $ "type error in application"
+
+
+-- Hide Env using Reader
+type EVal3 a = ReaderT Env (ExceptT String Identity) a
+
+runEval3 :: Env -> EVal3 a -> Either String a
+runEval3 env e = runIdentity $ runExceptT $ runReaderT e env
