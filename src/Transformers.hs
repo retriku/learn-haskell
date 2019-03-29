@@ -86,8 +86,7 @@ eval2 env (Plus exp1 exp2) =
     r1 <- eval2 env exp1
     r2 <- eval2 env exp2
     case (r1, r2) of
-      (IntVal a, IntVal b) ->
-        return $ IntVal (a + b)
+      (IntVal a, IntVal b) -> return $ IntVal (a + b)
       e -> throwError $ "exception: " ++ show e
 eval2 env (Abs name exp) = return $ FunVal env name exp
 eval2 env (App exp1 exp2) =
@@ -105,3 +104,31 @@ type EVal3 a = ReaderT Env (ExceptT String Identity) a
 
 runEval3 :: Env -> EVal3 a -> Either String a
 runEval3 env e = runIdentity $ runExceptT $ runReaderT e env
+
+eval3 :: Exp -> EVal3 Value
+eval3 (Lit i) = return $ IntVal i
+eval3 (Var x) =
+  do
+    env <- ask
+    case Map.lookup x env of
+      Just v -> return v
+      Nothing -> throwError $ "unbound variable: " ++ show x
+eval3 (Plus exp1 exp2) =
+  do
+    r1 <- eval3 exp1
+    r2 <- eval3 exp2
+    case (r1, r2) of
+      (IntVal a, IntVal b) -> return $ IntVal $ a + b
+      e -> throwError $ "exception: " ++ show e
+eval3 (Abs name exp) =
+  do
+    env <- ask
+    return $ FunVal env name exp
+eval3 (App exp1 exp2) =
+  do
+    r1 <- eval3 exp1
+    r2 <- eval3 exp2
+    case r1 of
+      FunVal env' n body ->
+        local (const $ Map.insert n r2 env') $ eval3 body
+      _ -> throwError $ "type error in application"
