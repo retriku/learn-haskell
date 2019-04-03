@@ -122,3 +122,47 @@ eval3 (App exp1 exp2) = do
   case r1 of
     FunVal env' n body -> local (const $ Map.insert n r2 env') $ eval3 body
     _ -> throwError $ "type error in application"
+
+-- Add logging with Writer
+type EVal4 = ReaderT Env (ExceptT String (WriterT [String] Identity))
+
+runEval4 :: Env -> EVal4 a -> (Either String a, [String])
+runEval4 env e = runIdentity $ runWriterT $ runExceptT $ runReaderT e env
+
+eval4 :: Exp -> EVal4 Value
+eval4 (Lit i) = do
+  tell $ ["literal value: " ++ show i]
+  return $ IntVal i
+eval4 (Var x) = do
+  env <- ask
+  case Map.lookup x env of
+    Just v -> do
+      tell $ ["returning: " ++ show v]
+      return v
+    Nothing -> do
+      tell $ [error]
+      throwError $ error
+      where error = "unbound variable: " ++ show x
+eval4 (Plus exp1 exp2) = do
+  r1 <- eval4 exp1
+  r2 <- eval4 exp2
+  case (r1, r2) of
+    (IntVal a, IntVal b) -> do
+      tell $ [show a ++ " + " ++ show b]
+      return $ IntVal $ a + b
+    e -> do
+      tell $ [error]
+      throwError $ error
+      where error = "unexpected error: " ++ show e
+eval4 (Abs name exp) = do
+  env <- ask
+  return $ FunVal env name exp
+eval4 (App exp1 exp2) = do
+  r1 <- eval4 exp1
+  r2 <- eval4 exp2
+  case r1 of
+    FunVal env' n body -> local (const $ Map.insert n r2 env') $ eval4 body
+    _ -> do
+      tell $ [error]
+      throwError $ error
+      where error = "type error in application"
