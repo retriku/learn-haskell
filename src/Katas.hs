@@ -72,16 +72,19 @@ instance Monad Identity where
     return = pure
     m >>= k  = k (runIdentity m)
 
-newtype IdentityT c v = IdentityT { runIdT :: c (Identity v) }
+newtype IdentityT c v = IdentityT { runIdentityT :: c (Identity v) }
 
 instance Functor f => Functor (IdentityT f) where
   fmap f idT =
-    let fid = runIdT idT
+    let fid = runIdentityT idT
     in IdentityT $ fmap (Identity . f . runIdentity) fid
 
 instance Applicative a => Applicative (IdentityT a) where
-  pure aidT = undefined
-  liftA2 f t1 t2 = undefined
+  pure = IdentityT . pure . Identity
+  liftA2 f at bt =
+    let a = fmap runIdentity $ runIdentityT at
+        b = fmap runIdentity $ runIdentityT bt
+    in IdentityT $ fmap Identity $ f <$> a <*> b
 
 instance Monad m => Monad (IdentityT m) where
   return = IdentityT . return . Identity
