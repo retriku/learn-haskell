@@ -19,3 +19,25 @@ rollDice :: StdGen -> ((Int, Int), StdGen)
 rollDice g = ((a, b), ng)
   where (a, g') = roll1Dice g
         (b, ng) = roll1Dice g'
+
+newtype State s a = State { runState :: s -> (a, s) }
+
+state :: (s -> (a, s)) -> State s a
+state = State
+
+instance Functor (State s) where
+  f `fmap` s = State(
+    \s'->
+      let (a, ns) = (runState s) s'
+          b = f a
+      in (b, ns)
+    )
+
+instance Applicative (State s) where
+  pure a = State(\s -> (a, s))
+  sf <*> a = State(
+    \s ->
+      let (f, ns) = (runState sf) s
+          b = f `fmap` a
+      in (runState b) ns
+    )
