@@ -1,5 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE InstanceSigs #-}
 module Katas where
 
 import Control.Applicative
@@ -74,21 +75,21 @@ instance Monad Identity where
 
 newtype IdentityT c v = IdentityT { runIdentityT :: c (Identity v) }
 
-instance Functor f => Functor (IdentityT f) where
-  fmap f idT =
-    let fid = runIdentityT idT
-    in IdentityT $ fmap (Identity . f . runIdentity) fid
+instance Monad m => Functor (IdentityT m) where
+  fmap = liftM
 
-instance Applicative a => Applicative (IdentityT a) where
-  pure = IdentityT . pure . Identity
-  liftA2 f at bt =
-    let a = fmap runIdentity $ runIdentityT at
-        b = fmap runIdentity $ runIdentityT bt
-    in IdentityT $ fmap Identity $ f <$> a <*> b
+instance Monad m => Applicative (IdentityT m) where
+  pure = return
+  (<*>) = ap
 
 instance Monad m => Monad (IdentityT m) where
   return = IdentityT . return . Identity
-  m >>= k = undefined
+
+  (>>=) :: IdentityT m a -> (a -> IdentityT m b) -> IdentityT m b
+  it >>= k = IdentityT $ do
+    a <- ma
+    runIdentityT $ k a
+      where ma = fmap runIdentity $ runIdentityT it
 
 instance MonadTrans IdentityT where
-  lift ma = undefined
+  lift = IdentityT . (liftM Identity)
