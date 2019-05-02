@@ -35,9 +35,34 @@ instance Functor (State s) where
 
 instance Applicative (State s) where
   pure a = State(\s -> (a, s))
-  sf <*> a = State(
-    \s ->
-      let (f, ns) = (runState sf) s
-          b = f `fmap` a
-      in (runState b) ns
-    )
+  sf <*> a = State $ \s ->
+    let (f, ns) = (runState sf) s
+        b = f `fmap` a
+    in (runState b) ns
+
+instance Monad (State s) where
+  return a = State(\s -> (a, s))
+  s >>= c = State $ \s'->
+    let (a, ns) = (runState s) s'
+    in (runState $ c a) ns
+
+put ns = State $ \_ -> ((), ns)
+get = State $ \s -> (s, s)
+
+evalState :: State s a -> s -> a
+evalState p s = fst (runState p s)
+
+execState :: State s a -> s -> s
+execState p s = snd (runState p s)
+
+
+type Stack a = State [a] a
+
+push :: a -> Stack a -> ((), Stack a)
+push a s = ((), newS)
+  where newS = State $ \s' ->
+          let (e, s1) = (runState s) s'
+          in (a, a : s1)
+
+pop :: Stack a -> (a, Stack a)
+pop s = undefined
