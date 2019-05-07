@@ -56,13 +56,23 @@ execState :: State s a -> s -> s
 execState p s = snd (runState p s)
 
 
-type Stack a = State [a] a
+push :: a -> State [a] ()
+push a = do
+  ns <- get
+  put (a : ns)
 
-push :: a -> Stack a -> ((), Stack a)
-push a s = ((), newS)
-  where newS = State $ \s' ->
-          let (e, s1) = (runState s) s'
-          in (a, a : s1)
+pop :: State [a] a
+pop = do
+  os <- get
+  case os of
+    [] -> undefined
+    [x] -> return x
+    (x:xs) -> State $ \_ -> (x, xs)
 
-pop :: Stack a -> (a, Stack a)
-pop s = undefined
+work = do
+  push 3
+  push 2
+  push 1
+  pop
+  push 4
+  pop
