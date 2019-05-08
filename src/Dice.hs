@@ -61,13 +61,13 @@ push a = do
   ns <- get
   put (a : ns)
 
-pop :: State [a] a
+pop :: State [a] (Maybe a)
 pop = do
   os <- get
   case os of
-    [] -> undefined
-    [x] -> return x
-    (x:xs) -> State $ \_ -> (x, xs)
+    [] -> State $ \_ -> (Nothing, [])
+    [x] -> State $ \_ -> (Just x, [])
+    (x:xs) -> State $ \_ -> (Just x, xs)
 
 work = do
   push 3
@@ -75,4 +75,6 @@ work = do
   push 1
   pop
   push 4
+  pop
+  pop
   pop
