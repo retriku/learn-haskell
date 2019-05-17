@@ -3,6 +3,8 @@ module Dice where
 import System.Random
 import Control.Applicative
 
+replicate' = flip replicate
+
 rollDiceIO :: IO (Int, Int)
 rollDiceIO = liftA2 (,) (randomRIO (1,6)) (randomRIO (1,6))
 
@@ -10,7 +12,7 @@ roll1DiceIO :: IO Int
 roll1DiceIO =  randomRIO (1, 6)
 
 rollNDiceIO :: Int -> IO [Int]
-rollNDiceIO = sequence . (flip replicate) roll1DiceIO
+rollNDiceIO = sequence . replicate' roll1DiceIO
 
 roll1Dice :: StdGen -> (Int, StdGen)
 roll1Dice = randomR (1, 6)
@@ -78,3 +80,26 @@ work = do
   pop
   pop
   pop
+
+
+rollDiceS :: State StdGen Int
+rollDiceS = do
+  generator <- get
+  let (value, newGenerator) = randomR (1, 6) generator
+  put newGenerator
+  return value
+
+rollDiceArr :: Int -> (StdGen, [Int])
+rollDiceArr n = foldl (\(g, a) _ ->
+                         let (v, ng) = roll1Dice g
+                         in (ng, v : a)
+                      )
+                (mkStdGen n, [])
+                (take n $ repeat n)
+
+rollNDice :: Int -> State StdGen [Int]
+rollNDice n = do
+  gen <- get
+  let (ng, v) = rollDiceArr n
+  put ng
+  return v
