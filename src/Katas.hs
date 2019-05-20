@@ -93,3 +93,12 @@ instance Monad m => Monad (IdentityT m) where
 
 instance MonadTrans IdentityT where
   lift = IdentityT . (liftM Identity)
+
+
+curry' :: ((a, b) -> c) -> a -> b -> c
+curry' f = \a -> \b -> f (a, b)
+
+uncurry' :: (a -> b -> c) -> ((a, b) -> c)
+uncurry' f = \(a, b) -> f a b
+
+addPair = uncurry' (+)
