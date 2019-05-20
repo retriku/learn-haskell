@@ -73,7 +73,7 @@ instance Monad Identity where
     return = pure
     m >>= k  = k (runIdentity m)
 
-newtype IdentityT c v = IdentityT { runIdentityT :: c (Identity v) }
+newtype IdentityT m v = IdentityT { runIdentityT :: m (Identity v) }
 
 instance Monad m => Functor (IdentityT m) where
   fmap = liftM

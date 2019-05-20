@@ -2,6 +2,8 @@ module CPS where
 
 import Control.Monad
 import Control.Applicative
+import Control.Monad.Trans.Cont
+import Control.Monad.Trans.Class
 
 add :: Int -> Int -> Int
 add = (+)
@@ -54,3 +56,24 @@ pythagoras_cont x y = do
   xx <- sqr_cont x
   yy <- sqr_cont y
   add_cont xx yy
+
+-- ContTr monad transformer
+newtype ContTr r m a = ContTr { runContTr :: (a -> m r) -> m r }
+
+instance Functor (ContTr r m) where
+  fmap f ct = ContTr $ \c -> runContTr ct (c . f)
+
+instance Applicative (ContTr r m) where
+  pure a = ContTr ($ a)
+  ctf <*> ctv = ContTr (\c ->
+                          runContTr ctf (\f ->
+                                           runContTr ctv (c . f)
+                                        )
+                       )
+
+instance Monad (ContTr r m) where
+  return = pure
+  a >>= f = undefined
+
+instance MonadTrans (ContTr r) where
+  lift = undefined
