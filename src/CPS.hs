@@ -28,16 +28,29 @@ pythagoras_cps x y = \k ->
 chainCPS :: ((a -> r) -> r) -> (a -> ((b -> r) -> r)) -> ((b -> r) -> r)
 chainCPS c f = \k -> c (\x -> f x k)
 
-newtype Cont r a = Cont { runCont :: (a -> r) -> r }
+-- Cont monad
+newtype ContM r a = ContM { runContM :: (a -> r) -> r }
 
-instance Functor (Cont r) where
-  fmap f c = Cont $ \k -> runCont c $ \x -> k $ f x
+instance Functor (ContM r) where
+  fmap f c = ContM $ \k -> runContM c $ \x -> k $ f x
 
-instance Applicative (Cont r) where
-  pure a = Cont ($ a)
-  liftA2 f fa fb = Cont $ \k ->
-    runCont fa $ \x -> (runCont fb $ \y -> k $ f x y)
+instance Applicative (ContM r) where
+  pure a = ContM ($ a)
+  liftA2 f fa fb = ContM $ \k ->
+    runContM fa $ \x -> (runContM fb $ \y -> k $ f x y)
 
-instance Monad (Cont r) where
-  return a = Cont ($ a)
-  c >>= f = Cont $ \k -> runCont c $ \x -> runCont (f x) k
+instance Monad (ContM r) where
+  return a = ContM ($ a)
+  c >>= f = ContM $ \k -> runContM c $ \x -> runContM (f x) k
+
+add_cont :: Int -> Int -> ContM r Int
+add_cont a b = return $ a + b
+
+sqr_cont :: Int -> ContM r Int
+sqr_cont x = return $ x * x
+
+pythagoras_cont :: Int -> Int -> ContM r Int
+pythagoras_cont x y = do
+  xx <- sqr_cont x
+  yy <- sqr_cont y
+  add_cont xx yy
