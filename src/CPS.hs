@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Applicative
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Class
+import Control.Monad.Identity
 
 add :: Int -> Int -> Int
 add = (+)
@@ -30,8 +31,33 @@ pythagoras_cps x y = \k ->
 chainCPS :: ((a -> r) -> r) -> (a -> ((b -> r) -> r)) -> ((b -> r) -> r)
 chainCPS c f = \k -> c (\x -> f x k)
 
+-- ContTr monad transformer
+newtype ContTr r m a = ContTr { runContTr :: (a -> m r) -> m r }
+
+instance Functor (ContTr r m) where
+  fmap f ct = ContTr $ \c -> runContTr ct (c . f)
+
+instance Applicative (ContTr r m) where
+  pure a = ContTr ($ a)
+  ctf <*> ctv = ContTr (\c ->
+                          runContTr ctf (\f ->
+                                           runContTr ctv (c . f)
+                                        )
+                       )
+
+instance Monad (ContTr r m) where
+  return = pure
+  ct >>= f =
+    ContTr $ \k ->
+               runContTr ct $ \c ->
+                                runContTr (f c) k
+
+instance MonadTrans (ContTr r) where
+  lift ma = ContTr $ \k -> ma >>= k
+
 -- Cont monad
 newtype ContM r a = ContM { runContM :: (a -> r) -> r }
+--type ContM r a = ContTr r Identity a
 
 instance Functor (ContM r) where
   fmap f c = ContM $ \k -> runContM c $ \x -> k $ f x
@@ -57,23 +83,12 @@ pythagoras_cont x y = do
   yy <- sqr_cont y
   add_cont xx yy
 
--- ContTr monad transformer
-newtype ContTr r m a = ContTr { runContTr :: (a -> m r) -> m r }
-
-instance Functor (ContTr r m) where
-  fmap f ct = ContTr $ \c -> runContTr ct (c . f)
-
-instance Applicative (ContTr r m) where
-  pure a = ContTr ($ a)
-  ctf <*> ctv = ContTr (\c ->
-                          runContTr ctf (\f ->
-                                           runContTr ctv (c . f)
-                                        )
-                       )
-
-instance Monad (ContTr r m) where
-  return = pure
-  a >>= f = undefined
-
-instance MonadTrans (ContTr r) where
-  lift = undefined
+-- from https://en.wikibooks.org/wiki/Haskell/Continuation_passing_style
+bar :: Char -> String -> Cont r Int
+bar c s = do
+    msg <- callCC $ \k -> do
+        let s0 = c : s
+        when (s0 == "hello") $ k "They say hello."
+        let s1 = show s0
+        return ("They appear to be saying " ++ s1)
+    return (length msg)
