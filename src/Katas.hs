@@ -6,7 +6,7 @@ module Katas where
 import Control.Applicative
 import Data.Functor.Contravariant (Contravariant (..))
 import Control.Monad
-import Control.Monad.Trans.Class
+import Control.Monad.Trans
 import System.Random
 
 difference :: Eq a => [a] -> [a] -> [a]

@@ -2,8 +2,7 @@ module CPS where
 
 import Control.Monad
 import Control.Applicative
-import Control.Monad.Trans.Cont
-import Control.Monad.Trans.Class
+import Control.Monad.Cont
 import Control.Monad.Identity
 
 add :: Int -> Int -> Int
@@ -56,20 +55,38 @@ instance MonadTrans (ContTr r) where
   lift ma = ContTr $ \k -> ma >>= k
 
 -- Cont monad
-newtype ContM r a = ContM { runContM :: (a -> r) -> r }
---type ContM r a = ContTr r Identity a
+--newtype ContM r a = ContM { runContM :: (a -> r) -> r }
 
-instance Functor (ContM r) where
-  fmap f c = ContM $ \k -> runContM c $ \x -> k $ f x
+--instance Functor (ContM r) where
+--  fmap f c = ContM $ \k -> runContM c $ \x -> k $ f x
 
-instance Applicative (ContM r) where
-  pure a = ContM ($ a)
-  liftA2 f fa fb = ContM $ \k ->
-    runContM fa $ \x -> (runContM fb $ \y -> k $ f x y)
+--instance Applicative (ContM r) where
+--  pure a = ContM ($ a)
+--  liftA2 f fa fb = ContM $ \k ->
+--    runContM fa $ \x -> (runContM fb $ \y -> k $ f x y)
 
-instance Monad (ContM r) where
-  return a = ContM ($ a)
-  c >>= f = ContM $ \k -> runContM c $ \x -> runContM (f x) k
+--instance Monad (ContM r) where
+--  return a = ContM ($ a)
+--  c >>= f = ContM $ \k -> runContM c $ \x -> runContM (f x) k
+
+type ContM r = ContTr r Identity
+
+contM :: ((a -> r) -> r) -> ContM r a
+contM f = ContTr $ \c -> Identity(f $ runIdentity . c)
+
+runContM :: ContM r a -> (a -> r) -> r
+runContM r f = runIdentity (runContTr r $ Identity . f)
+
+callCC' :: ((a -> ContM r b) -> ContM r a) -> ContM r a
+callCC' c = undefined
+
+divExcpt :: Int -> Int -> (String -> ContM r Int) -> ContM r Int
+divExcpt x y handler = callCC' $ \ok -> do
+    err <- callCC' $ \notOk -> do
+        when (y == 0) $ notOk "Denominator 0"
+        ok $ x `div` y
+    handler err
+
 
 add_cont :: Int -> Int -> ContM r Int
 add_cont a b = return $ a + b

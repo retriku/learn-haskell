@@ -26,7 +26,6 @@ dependencies:
 - acme-missiles
 - random
 - containers
-- transformers
 
 library:
   source-dirs:
