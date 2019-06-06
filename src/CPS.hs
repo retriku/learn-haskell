@@ -77,7 +77,7 @@ contM f = ContTr $ \c -> Identity(f $ runIdentity . c)
 runContM :: ContM r a -> (a -> r) -> r
 runContM r f = runIdentity (runContTr r $ Identity . f)
 
-callCC' :: ((a -> ContM r b) -> ContM r a) -> ContM r a
+callCC' :: MonadCont m => ((a -> m b) -> m a) -> m a
 callCC' c = undefined
 
 divExcpt :: Int -> Int -> (String -> ContM r Int) -> ContM r Int
